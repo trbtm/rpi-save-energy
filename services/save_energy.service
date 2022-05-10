@@ -2,11 +2,11 @@
 Description=Saves energy on Raspberry Pis
 
 [Service]
-User=pi
+User=root
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/bin/bash -c "~/safe_power.sh activate"
-ExecStop=/bin/bash -c "~/safe_power.sh deactivate"
+WorkingDirectory=$WORKING_DIR
+ExecStart=/bin/bash ./scripts/save_energy.sh
 
 [Install]
 WantedBy=multi-user.target
