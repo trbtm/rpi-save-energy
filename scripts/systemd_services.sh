@@ -6,7 +6,7 @@
 # Arguments:
 #   - $1: filepath of the .service file
 #   - $2: ($WORKING_DIR) the working directory of the service
-#   - (optional) $3: ($USER) the user of the service
+#   - (optional) $3: the user of the service
 # Outputs:
 #   None
 #######################################
@@ -15,19 +15,15 @@ setup_service()
 {
     service_filepath=$1
     working_dir=$2
-    service_name=$(basename $service_filepath)
     user=$3 # optional
+
+    service_name=$(basename $service_filepath)
+
+    stop_service $service_name
 
     if [ -z "$user" ]; then
         user=$(stat -c '%U' $service_filepath)
     fi
-
-    # Kill and disable the old service if its still running
-    timeout 10s sudo systemctl --no-ask-password stop $service_name --quiet
-    if [ $? -ne 0 ]; then
-        sudo systemctl kill -s SIGKILL $service_name
-    fi
-    sudo systemctl disable $service_name --quiet
     
     # Prepare the service file
     sudo rm -f /tmp/$service_name
@@ -38,5 +34,42 @@ setup_service()
 
     # Prepare the service to be started or invoked by a timer
     sudo cp /tmp/$service_name /etc/systemd/system
-    sudo systemctl enable $service_name
+    sudo systemctl enable $service_name --quiet
+}
+
+#######################################
+# Starts a systemd service
+# Globals:
+#   None
+# Arguments:
+#   - $1: name of service
+# Outputs:
+#   None
+#######################################
+
+start_service()
+{
+    service_name=$1
+    sudo systemctl start $service_name --quiet
+    sudo systemctl status --no-pager $service_name --lines=0
+}
+
+#######################################
+# Stops a systemd service safely
+# Globals:
+#   None
+# Arguments:
+#   - $1: name of service
+# Outputs:
+#   None
+#######################################
+
+stop_service()
+{
+    service_name=$1
+    timeout 10s sudo systemctl --no-ask-password stop $service_name --quiet
+    if [ $? -ne 0 ]; then
+        sudo systemctl kill -s SIGKILL $service_name
+    fi
+    sudo systemctl disable $service_name --quiet
 }
