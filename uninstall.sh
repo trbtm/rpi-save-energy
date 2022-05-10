@@ -16,29 +16,53 @@ source $BASEDIR/scripts/user_yes_no.sh
 source $BASEDIR/scripts/write_boot_config.sh
 source $BASEDIR/scripts/systemd_services.sh
 
+#
+# Power LED
+#
+
+if [ $(read_config_json disable_power_led) = "true" ]; then
+    write_boot_config "#" true dtparam pwr_led_trigger none
+    write_boot_config "#" true dtparam pwr_led_activelow off
+fi
+
+#
+# Activity LED
+#
+
+if [ $(read_config_json disable_activity_led) = "true" ]; then
+    write_boot_config "#" true dtparam act_led_trigger none
+    write_boot_config "#" true dtparam act_led_activelow off
+fi
 
 #
 # Ethernet LEDs
 #
 
-if [ $(read_config_json disable_ethernet_leds) = "true" ] ; then
-    write_boot_config "#" true dtparam eth_led0 14
-    write_boot_config "#" true dtparam eth_led1 14
+if [ $(read_config_json disable_ethernet_leds) = "true" ]; then
+    write_boot_config "" true dtparam eth_led0 0
+    write_boot_config "" true dtparam eth_led1 0
+
+    write_boot_config "#" true dtparam eth_led0 0
+    write_boot_config "#" true dtparam eth_led1 0
 fi
 
 #
 # Bluetooth
 #
 
-if [ $(read_config_json disable_bluetooth) = "true" ] ; then
+if [ $(read_config_json disable_bluetooth) = "true" ]; then
     write_boot_config "#" false dtoverlay disable-bt
+
+    sudo systemctl enable hciuart.service >> /dev/null &> /dev/null
+    sudo systemctl enable bluetooth.service >> /dev/null &> /dev/null
+    sudo systemctl enable bluealsa.service >> /dev/null &> /dev/null
 fi
 
 #
 # Wifi
 #
 
-if [ $(read_config_json disable_wifi) = "true" ] ; then
+if [ $(read_config_json disable_wifi) = "true" ]; then
     write_boot_config "#" false dtoverlay disable-wifi
 fi
 
@@ -46,9 +70,9 @@ fi
 # HDMI
 #
 
-if [ $(read_config_json disable_hdmi) = "true" ] ; then
+if [ $(read_config_json disable_hdmi) = "true" ]; then
     echo "Depending on your Raspberry Pi model you might want enable the modern graphics driver."
-    echo "Uncomment dtoverlay vc4-kms-v3d in /boot/config.txt to do that."
+    echo "Uncomment dtoverlay=vc4-kms-v3d in /boot/config.txt to do that."
 fi
 
 

@@ -67,9 +67,9 @@ start_service()
 stop_service()
 {
     service_name=$1
-    timeout 10s sudo systemctl --no-ask-password stop $service_name --quiet
+    timeout 10s bash -c "sudo systemctl --no-ask-password stop $service_name --quiet >> /dev/null &> /dev/null"
     if [ $? -ne 0 ]; then
-        sudo systemctl kill -s SIGKILL $service_name
+        sudo systemctl kill -s SIGKILL $service_name >> /dev/null &> /dev/null
     fi
-    sudo systemctl disable $service_name --quiet
+    sudo systemctl disable $service_name --quiet >> /dev/null &> /dev/null
 }

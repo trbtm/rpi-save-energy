@@ -23,7 +23,7 @@ write_boot_config()
         arg_string="$arg_string=${!i}"
     done
 
-    if [ "$unique" = false ] ; then
+    if [ "$unique" = false ]; then
         arg_regex="$arg_regex\s*=\s*${!#}$"
     else
         arg_regex="$arg_regex\s*=.*$"
