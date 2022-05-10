@@ -1,0 +1,12 @@
+[Unit]
+Description=Saves energy on Raspberry Pis
+
+[Service]
+User=pi
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/bash -c "~/safe_power.sh activate"
+ExecStop=/bin/bash -c "~/safe_power.sh deactivate"
+
+[Install]
+WantedBy=multi-user.target
