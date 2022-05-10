@@ -72,7 +72,7 @@ fi
 
 if [ $(read_config_json disable_hdmi) = "true" ]; then
     echo "Depending on your Raspberry Pi model you might want enable the modern graphics driver."
-    echo "Uncomment dtoverlay vc4-kms-v3d in /boot/config.txt to do that."
+    echo "Uncomment dtoverlay=vc4-kms-v3d in /boot/config.txt to do that."
 fi
 
 
