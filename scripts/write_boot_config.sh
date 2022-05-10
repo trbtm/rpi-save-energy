@@ -5,25 +5,36 @@
 #   None
 # Arguments:
 #   - $1: '""'' or '#' whether you want to activate or deactivate the option
-#   - $2 to $i: the options and their respective value like 'dtparam=audio=off' => '"" dtparam audio off'
+#   - $2: is the option unique, e.g. dtoverlay occurs multiple times ['true' | 'false']
+#   - $3 to $i: the options and their respective value like 'dtparam=audio=off' => '"" dtparam audio off'
 # Outputs:
 #   None
 #######################################
 
-ensure_boot_config_option()
+write_boot_config()
 {
-    arg_regex="^\s*#*\s*$2"
-    arg_string="$1$2"
-    for (( i=3; i <= "$# - 1"; i++ )); do
+    comment=$1
+    unique=$2
+
+    arg_regex="^\s*#*\s*$3"
+    arg_string="$comment$3"
+    for (( i=4; i <= "$# - 1"; i++ )); do
         arg_regex="$arg_regex\s*=\s*${!i}"
         arg_string="$arg_string=${!i}"
     done
-    arg_regex="$arg_regex\s*=.*$"
+
+    if [ "$unique" = false ] ; then
+        arg_regex="$arg_regex\s*=\s*${!#}$"
+    else
+        arg_regex="$arg_regex\s*=.*$"
+    fi
+
     arg_string="$arg_string=${!#}"
     option_exists=$(sudo sed -n -r "/$arg_regex/p" /boot/config.txt | grep "" -c)
+
     if (( option_exists > 0 )); then
         sudo sed -i -r "s/$arg_regex/$arg_string/" /boot/config.txt
     else
-        echo $arg_string | sudo tee -a /boot/config.txt
+        echo $arg_string | sudo tee -a /boot/config.txt >> /dev/null
     fi
 }
