@@ -13,6 +13,6 @@ fi
 source $BASEDIR/read_write_config_json.sh
 
 # Disable HDMI
-if [ $(read_config_json disable_hdmi) = "true" ]; then
+if [ "$(read_config_json disable_hdmi)" = true ]; then
     sudo tvservice --off || true
 fi
