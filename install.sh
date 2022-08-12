@@ -14,6 +14,8 @@ source $BASEDIR/scripts/user_yes_no.sh
 source $BASEDIR/scripts/write_boot_config.sh
 source $BASEDIR/scripts/systemd_services.sh
 
+computer_type=$(tr -d '\0' < /sys/firmware/devicetree/base/model)
+
 restart=false
 needs_service=false
 
@@ -30,7 +32,10 @@ disable_power_led()
     restart=true
 }
 
-user_yes_no "Do you want to disable the Power LED?" disable_power_led
+# Raspberry Pi Zero does not have a Power LED
+if [[ $computer_type != *"Zero"* ]]; then
+    user_yes_no "Do you want to disable the Power LED?" disable_power_led
+fi
 
 #
 # Activity LED
@@ -41,7 +46,12 @@ disable_activity_led()
     write_config_json disable_activity_led true
 
     write_boot_config "" true dtparam act_led_trigger none
-    write_boot_config "" true dtparam act_led_activelow off
+    # Config is different for Raspberry Pi Zero
+    if [[ $computer_type == *"Zero"* ]]; then
+        write_boot_config "" true dtparam act_led_activelow on
+    else
+        write_boot_config "" true dtparam act_led_activelow off
+    fi
     restart=true
 }
 
